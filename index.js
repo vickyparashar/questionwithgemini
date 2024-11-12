@@ -29,7 +29,7 @@ async function uploadToGemini(path, mimeType) {
 
 const model = genAI.getGenerativeModel({
   model: "gemini-1.5-pro-002",
-  systemInstruction: "Your Job is to answer the question, so please give correct answers only",
+  systemInstruction: "Your job is to answer the question, so please provide correct answers only. If the response is long, please make it concise",
 });
 
 const generationConfig = {
@@ -69,6 +69,13 @@ async function run() {
 
   const result = await chatSession.sendMessage("INSERT_INPUT_HERE");
   console.log(result.response.text());
+      // Show a desktop notification
+      notifier.notify({
+        title: 'Answer',
+        message: result.response.text(),
+        sound: true,
+        wait: true
+      });
 }
 
 async function captureDesktopScreenshot(outputPath) {
@@ -77,13 +84,7 @@ async function captureDesktopScreenshot(outputPath) {
     await screenshot({ filename: outputPath });
     console.log(`Screenshot saved at ${outputPath}`);
 
-    // Show a desktop notification
-    notifier.notify({
-      title: 'Screenshot Captured',
-      message: 'Your screenshot has been saved successfully!',
-      sound: true,
-      wait: true
-    });
+
 
 
 
@@ -93,7 +94,6 @@ async function captureDesktopScreenshot(outputPath) {
 }
 
 
-
-
+//captureDesktopScreenshot('./images/quiz.png');
 run();
 
