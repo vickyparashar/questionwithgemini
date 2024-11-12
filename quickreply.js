@@ -37,12 +37,12 @@ async function run() {
 
         // Send message to Gemini AI and get response
          const result = await chatSession.sendMessage(clipboardText);
-         const responseText = result.response.text().toString();
+         const responseText = result.response.text();
    
 
         //const responseText="A large, predatory cat native to Africa and India, known for its mane (in males).";
         // Set the response back to clipboard
-        require('child_process').spawn('clip').stdin.end(util.inspect(responseText));
+       // require('child_process').spawn('clip').stdin.end(util.inspect(responseText));
         console.log('Response Text:', responseText);
         // Show notification
         notifier.notify({
