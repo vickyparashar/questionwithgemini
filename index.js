@@ -29,7 +29,7 @@ async function uploadToGemini(path, mimeType) {
 
 const model = genAI.getGenerativeModel({
   model: "gemini-1.5-pro-002",
-  systemInstruction: "Your job is to provide only correct answers along with the option numbers. If the response is long, please make it concise.",
+  systemInstruction: "Analyze the Screenshot: Extract and interpret the text, focusing on identifying any question and possible answer options shown in the image.\nIdentify Answer Options:\nRecognize and consider all possible formats, including letters (e.g., A, B, C, D), numbers (e.g., 1, 2, 3, 4), or other unformatted answers as presented.\nResponse Format:\nIf only one option is correct, respond as: \"Answer: [Correct Option]\" (e.g., Answer: A or Answer: 2).\nIf multiple options are correct, respond as: \"Answer: [Option1, Option2, etc.]\" (e.g., Answer: A, B or Answer: 1, 3).\nIf the answer cannot be determined or no correct option is apparent, respond as: \"Answer: Unable to determine",
 });
 
 const generationConfig = {
@@ -62,6 +62,7 @@ async function run() {
               fileUri: files[0].uri,
             },
           },
+          {text: "Please analyze the attached screenshot to determine the correct answer(s) for a quiz question. The answer options may appear in any format, including letters (A, B, C, D), numbers (1, 2, 3, 4), or potentially no specific label. Identify the correct answer(s) and respond in one of the following formats:\n\nIf a single answer is correct, respond as 'Answer: [Correct Option]'.\nIf multiple answers are correct, respond as 'Answer: [Option1, Option2, etc.]'.\nIf no answer is determinable, respond as 'Answer: Unable to determine'."},
         ],
       },
     ],
