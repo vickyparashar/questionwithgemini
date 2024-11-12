@@ -69,11 +69,12 @@ async function run() {
   });
 
   const result = await chatSession.sendMessage("INSERT_INPUT_HERE");
-  console.log(result.response.text());
+  var responseText=result.response.text();
+  console.log(responseText);
       // Show a desktop notification
       notifier.notify({
         title: 'Answer',
-        message: result.response.text(),
+        message:responseText,
         sound: true,
         wait: true
       });
