@@ -1,2 +1,2 @@
 @echo off
-node "C:\Vicky\tools\genaigoogle\questionwithgemini\index.js"
+node "%~dp0index.js"
