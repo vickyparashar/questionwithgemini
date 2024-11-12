@@ -29,7 +29,7 @@ async function uploadToGemini(path, mimeType) {
 
 const model = genAI.getGenerativeModel({
   model: "gemini-1.5-pro-002",
-  systemInstruction: "Your job is to provide only correct answers along with the option numbers.",
+  systemInstruction: "Your job is to provide only correct answers along with the option numbers. If the response is long, please make it concise.",
 });
 
 const generationConfig = {
