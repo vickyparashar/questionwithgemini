@@ -18,13 +18,18 @@ const fileManager = new GoogleAIFileManager(apiKey);
  * See https://ai.google.dev/gemini-api/docs/prompting_with_media
  */
 async function uploadToGemini(path, mimeType) {
-  const uploadResult = await fileManager.uploadFile(path, {
-    mimeType,
-    displayName: path,
-  });
-  const file = uploadResult.file;
-  console.log(`Uploaded file ${file.displayName} as: ${file.name}`);
-  return file;
+  try {
+    const uploadResult = await fileManager.uploadFile(path, {
+      mimeType,
+      displayName: path,
+    });
+    const file = uploadResult.file;
+    console.log(`Uploaded file ${file.displayName} as: ${file.name}`);
+    return file;
+  } catch (error) {
+    handleError('Error uploading file to Gemini:', error);
+    throw error; // Re-throw error to propagate it
+  }
 }
 
 const model = genAI.getGenerativeModel({
@@ -41,43 +46,56 @@ const generationConfig = {
 };
 
 async function run() {
+  try {
+    await captureDesktopScreenshot('./images/quiz.png');
+    const files = [await uploadToGemini("./images/quiz.png", "image/png")];
 
-  await captureDesktopScreenshot('./images/quiz.png');
-
-  // TODO Make these files available on the local file system
-  // You may need to update the file paths
-  const files = [
-    await uploadToGemini("./images/quiz.png", "image/png"),
-  ];
-
-  const chatSession = model.startChat({
-    generationConfig,
-    history: [
-      {
-        role: "user",
-        parts: [
-          {
-            fileData: {
-              mimeType: files[0].mimeType,
-              fileUri: files[0].uri,
+    const chatSession = model.startChat({
+      generationConfig,
+      history: [
+        {
+          role: "user",
+          parts: [
+            {
+              fileData: {
+                mimeType: files[0].mimeType,
+                fileUri: files[0].uri,
+              },
             },
-          },
-          {text: "Please analyze the attached screenshot to determine the correct answer(s) for a quiz question. The answer options may appear in any format, including letters (A, B, C, D), numbers (1, 2, 3, 4), or potentially no specific label. Identify the correct answer(s) and respond in one of the following formats:\n\nIf a single answer is correct, respond as 'Answer: [Correct Option]'.\nIf multiple answers are correct, respond as 'Answer: [Option1, Option2, etc.]'.\nIf no answer is determinable, respond as 'Answer: Unable to determine'."},
-        ],
-      },
-    ],
-  });
+            {
+              text: "Please analyze the attached screenshot to determine the correct answer(s) for a quiz question. The answer options may appear in any format, including letters (A, B, C, D), numbers (1, 2, 3, 4), or potentially no specific label. Identify the correct answer(s) and respond in one of the following formats:\n\nIf a single answer is correct, respond as 'Answer: [Correct Option]'.\nIf multiple answers are correct, respond as 'Answer: [Option1, Option2, etc.]'.\nIf no answer is determinable, respond as 'Answer: Unable to determine'.",
+            },
+          ],
+        },
+      ],
+    });
 
-  const result = await chatSession.sendMessage("INSERT_INPUT_HERE");
-  var responseText=result.response.text();
-  console.log(responseText);
-      // Show a desktop notification
-      notifier.notify({
-        title: 'Answer',
-        message:responseText,
-        sound: true,
-        wait: true
-      });
+    const result = await chatSession.sendMessage("INSERT_INPUT_HERE");
+    const responseText = result.response.text();
+    console.log(responseText);
+
+    // Show a desktop notification with the result
+    notifier.notify({
+      title: 'Answer',
+      message: responseText,
+      sound: true,
+      wait: true
+    });
+
+  } catch (error) {
+    handleError('An error occurred:', error);
+  }
+}
+
+// Helper function to handle errors and display notifications
+function handleError(message, error) {
+  console.error(message, error);
+  notifier.notify({
+    title: 'Error',
+    message: `${message} ${error.message}`,
+    sound: true,
+    wait: true
+  });
 }
 
 async function captureDesktopScreenshot(outputPath) {
@@ -85,17 +103,9 @@ async function captureDesktopScreenshot(outputPath) {
     // Capture the screenshot and save it to the specified path
     await screenshot({ filename: outputPath });
     console.log(`Screenshot saved at ${outputPath}`);
-
-
-
-
-
   } catch (error) {
-    console.error('Error capturing screenshot:', error);
+    handleError('Error capturing screenshot:', error);
   }
 }
 
-
-//captureDesktopScreenshot('./images/quiz.png');
 run();
-
